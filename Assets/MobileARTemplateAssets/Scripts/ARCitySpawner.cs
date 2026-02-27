@@ -42,16 +42,23 @@ public class ARCitySpawner : MonoBehaviour
 
     void SpawnCity(Pose pose)
     {
-        spawnedCity = Instantiate(cityPrefab, pose.position, Quaternion.identity);
+        Camera cam = Camera.main;
 
-        // Giữ thẳng đứng
-        spawnedCity.transform.rotation = Quaternion.Euler(0, pose.rotation.eulerAngles.y, 0);
+        float minDistance = 1.5f;
 
-        // Nhấc nhẹ lên khỏi plane tránh chìm
-        spawnedCity.transform.position += Vector3.up * 0.05f;
+        Vector3 spawnPos = pose.position;
 
-        // Scale cố định (chỉnh tay tuỳ model)
+        float distance = Vector3.Distance(cam.transform.position, spawnPos);
+
+        if (distance < minDistance)
+        {
+            Vector3 dir = (spawnPos - cam.transform.position).normalized;
+            spawnPos = cam.transform.position + dir * minDistance;
+        }
+
+        spawnedCity = Instantiate(cityPrefab, spawnPos, Quaternion.identity);
         spawnedCity.transform.localScale = Vector3.one * 0.1f;
+        spawnedCity.transform.position += Vector3.up * 0.05f;
     }
 
     void AutoScaleToCamera(GameObject obj, Camera cam)
