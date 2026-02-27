@@ -3,43 +3,93 @@ using System.Collections;
 
 public class BoySimulation : MonoBehaviour
 {
-    Animator anim;
+    [Header("Movement")]
+    [SerializeField] private float firstMoveDistance = 0.42f;
+    [SerializeField] private float secondMoveDistance = 0.06f;
+    [SerializeField] private float moveSpeed = 0.1f;
 
-    float moveDistance = 5f;
-    float moveSpeed = 2f;
+    [Header("Rotation")]
+    [SerializeField] private float rotateAngle = 90f;
+    [SerializeField] private float rotateSpeed = 120f;
+
+    private Animator anim;
+    private bool hasFallen = false;
 
     void Start()
     {
-        anim = GetComponent<Animator>();
-        StartCoroutine(SimulationRoutine());
+        anim = GetComponentInChildren<Animator>();
+
+        if (anim != null)
+            anim.applyRootMotion = false;
+
+        StartCoroutine(MainRoutine());
     }
 
-    IEnumerator SimulationRoutine()
+    IEnumerator MainRoutine()
     {
-        // 1. Đi bộ 5m
-        anim.SetBool("isWalking", true);
+        yield return Walk(firstMoveDistance);
+        if (hasFallen) yield break;
 
-        float moved = 0f;
+        yield return RotateRight(rotateAngle);
+        if (hasFallen) yield break;
 
-        while (moved < moveDistance)
+        yield return Walk(secondMoveDistance);
+    }
+
+    IEnumerator Walk(float distance)
+    {
+        SetWalking(true);
+
+        Vector3 startPos = transform.position;
+        Vector3 targetPos = startPos + transform.forward * distance;
+
+        while (Vector3.Distance(transform.position, targetPos) > 0.005f)
         {
-            float step = moveSpeed * Time.deltaTime;
-            transform.Translate(Vector3.forward * step);
-            moved += step;
+            if (hasFallen) yield break;
+
+            transform.position = Vector3.MoveTowards(
+                transform.position,
+                targetPos,
+                moveSpeed * Time.deltaTime
+            );
+
             yield return null;
         }
 
-        anim.SetBool("isWalking", false);
+        transform.position = targetPos;
+        SetWalking(false);
+    }
 
-        // 2. Chờ 1 giây
-        yield return new WaitForSeconds(1f);
+    IEnumerator RotateRight(float angle)
+    {
+        float rotated = 0f;
 
-        // 3. Ngã
-        anim.SetTrigger("fall");
+        while (rotated < angle)
+        {
+            if (hasFallen) yield break;
 
-        // 4. Đợi animation ngã + đứng dậy hoàn tất
-        yield return new WaitForSeconds(3f);
+            float step = rotateSpeed * Time.deltaTime;
+            transform.Rotate(Vector3.up * step);
+            rotated += step;
 
-        // 5. Trở về idle (Animator tự xử lý nếu bạn setup đúng)
+            yield return null;
+        }
+    }
+
+    void SetWalking(bool value)
+    {
+        if (anim != null)
+            anim.SetBool("isWalking", value);
+    }
+
+    public void Fall()
+    {
+        if (hasFallen) return;
+
+        hasFallen = true;
+        SetWalking(false);
+
+        if (anim != null)
+            anim.SetTrigger("fall");
     }
 }

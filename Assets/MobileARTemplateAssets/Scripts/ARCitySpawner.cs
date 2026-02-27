@@ -9,10 +9,13 @@ public class ARCitySpawner : MonoBehaviour
     [Header("Prefab")]
     public GameObject cityPrefab;
 
-    [Header("Input")]
     [SerializeField] private InputActionReference tapAction;
 
+    public float minDistanceFromCamera = 1.5f;
+
     private ARRaycastManager raycastManager;
+    private ARPlaneManager planeManager;
+
     private GameObject spawnedCity;
 
     static List<ARRaycastHit> hits = new List<ARRaycastHit>();
@@ -20,6 +23,7 @@ public class ARCitySpawner : MonoBehaviour
     void Awake()
     {
         raycastManager = GetComponent<ARRaycastManager>();
+        planeManager = GetComponent<ARPlaneManager>();
     }
 
     void OnEnable() => tapAction.action.Enable();
@@ -37,51 +41,52 @@ public class ARCitySpawner : MonoBehaviour
             TrackableType.PlaneWithinBounds))
             return;
 
-        SpawnCity(hits[0].pose);
+        SpawnAtPlaneCenter(hits[0]);
     }
 
-    void SpawnCity(Pose pose)
+    void SpawnAtPlaneCenter(ARRaycastHit hit)
     {
-        Camera cam = Camera.main;
-
-        float minDistance = 1.5f;
-
-        Vector3 spawnPos = pose.position;
-
-        float distance = Vector3.Distance(cam.transform.position, spawnPos);
-
-        if (distance < minDistance)
-        {
-            Vector3 dir = (spawnPos - cam.transform.position).normalized;
-            spawnPos = cam.transform.position + dir * minDistance;
-        }
-
-        spawnedCity = Instantiate(cityPrefab, spawnPos, Quaternion.identity);
-        spawnedCity.transform.localScale = Vector3.one * 0.1f;
-        spawnedCity.transform.position += Vector3.up * 0.05f;
-    }
-
-    void AutoScaleToCamera(GameObject obj, Camera cam)
-    {
-        Renderer[] renderers = obj.GetComponentsInChildren<Renderer>();
-
-        if (renderers.Length == 0)
+        ARPlane plane = planeManager.GetPlane(hit.trackableId);
+        if (plane == null || plane.boundary.Length == 0)
             return;
+
+        // Tính tâm thực của boundary
+        Vector2 sum = Vector2.zero;
+
+        foreach (var point in plane.boundary)
+            sum += point;
+
+        Vector2 center2D = sum / plane.boundary.Length;
+
+        // Convert local 2D -> world
+        Vector3 centerWorld = plane.transform.TransformPoint(
+            new Vector3(center2D.x, 0f, center2D.y)
+        );
+
+        // Offset nhẹ theo normal
+        centerWorld += plane.transform.up * 0.1f;
+
+        spawnedCity = Instantiate(
+            cityPrefab,
+            centerWorld,
+            plane.transform.rotation
+        );
+
+        spawnedCity.transform.localScale =
+            new Vector3(0.25f, 0.25f, 0.25f);
+
+        // ===== FIX pivot lệch =====
+        Renderer[] renderers =
+            spawnedCity.GetComponentsInChildren<Renderer>();
 
         Bounds bounds = renderers[0].bounds;
         foreach (Renderer r in renderers)
             bounds.Encapsulate(r.bounds);
 
-        float size = bounds.size.magnitude;
+        // Tính offset từ pivot tới center thực
+        Vector3 offset = bounds.center - spawnedCity.transform.position;
 
-        float distance =
-            Vector3.Distance(cam.transform.position, obj.transform.position);
-
-        // City chiếm khoảng 70% view
-        float targetSize = distance * 0.7f;
-
-        float scaleFactor = targetSize / size;
-
-        obj.transform.localScale *= scaleFactor;
+        // Dời city về đúng center
+        spawnedCity.transform.position -= offset;
     }
 }
