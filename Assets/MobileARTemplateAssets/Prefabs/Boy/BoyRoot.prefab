@@ -40,13 +40,16 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1393009114593256649}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: aabc35cb6074c1f47b83c5c29731251a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveDistance: 0.35
+  firstMoveDistance: 0.42
+  secondMoveDistance: 0.06
   moveSpeed: 0.07
+  rotateAngle: 90
+  rotateSpeed: 120
 --- !u!1001 &2567080475408707564
 PrefabInstance:
   m_ObjectHideFlags: 0

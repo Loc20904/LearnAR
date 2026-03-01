@@ -1,0 +1,99 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 0}
+  m_Name: SafeTrafficScenario
+  m_EditorClassIdentifier: Assembly-CSharp::ScenarioData
+  scenarioTitle: Safe Traffic Scenario
+  steps:
+  - stepName: Intro
+    dialogueText: Safe traffic
+    illustration: {fileID: 0}
+    voiceOver: {fileID: 0}
+    visualActions:
+    - type: 0
+      actorIndex: 0
+      parameter: 
+      targetPointName: BoyMove1
+      targetOffset: {x: 0, y: 0, z: 0}
+      duration: 10
+      waitForFinish: 1
+    - type: 1
+      actorIndex: 0
+      parameter: 
+      targetPointName: 
+      targetOffset: {x: 0, y: 90, z: 0}
+      duration: 0.5
+      waitForFinish: 1
+    choices:
+    - choiceText: "B\u0103ng qua \u0111\u01B0\u1EDDng"
+      isCorrect: 0
+      feedback: "nguy hi\u1EC3m"
+      nextStepIndex: 1
+    - choiceText: "Ch\u1EDD xe"
+      isCorrect: 1
+      feedback: "an to\xE0n"
+      nextStepIndex: 2
+  - stepName: IncorectChoice
+    dialogueText: 
+    illustration: {fileID: 0}
+    voiceOver: {fileID: 0}
+    visualActions:
+    - type: 0
+      actorIndex: 0
+      parameter: 
+      targetPointName: BoyMove2
+      targetOffset: {x: 0, y: 0, z: 0}
+      duration: 2
+      waitForFinish: 0
+    - type: 0
+      actorIndex: 1
+      parameter: 
+      targetPointName: Car1Move1
+      targetOffset: {x: 0, y: 0, z: 0}
+      duration: 2
+      waitForFinish: 1
+    - type: 2
+      actorIndex: 0
+      parameter: falling-down
+      targetPointName: 
+      targetOffset: {x: 0, y: 0, z: 0}
+      duration: 4
+      waitForFinish: 1
+    choices:
+    - choiceText: Restart
+      isCorrect: 0
+      feedback: 
+      nextStepIndex: 0
+  - stepName: corectChoice
+    dialogueText: 
+    illustration: {fileID: 0}
+    voiceOver: {fileID: 0}
+    visualActions:
+    - type: 0
+      actorIndex: 1
+      parameter: 
+      targetPointName: Car1Move2
+      targetOffset: {x: 0, y: 0, z: 0}
+      duration: 5
+      waitForFinish: 1
+    - type: 0
+      actorIndex: 0
+      parameter: 
+      targetPointName: BoyMove3
+      targetOffset: {x: 0, y: 0, z: 0}
+      duration: 5
+      waitForFinish: 1
+    choices:
+    - choiceText: Restart
+      isCorrect: 0
+      feedback: 
+      nextStepIndex: 0

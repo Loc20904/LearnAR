@@ -8,6 +8,7 @@ public class ARCitySpawner : MonoBehaviour
 {
     [Header("Prefab")]
     public GameObject cityPrefab;
+    public ScenarioUIManager uiManagerInScene;
 
     [SerializeField] private InputActionReference tapAction;
 
@@ -88,5 +89,21 @@ public class ARCitySpawner : MonoBehaviour
 
         // Dời city về đúng center
         spawnedCity.transform.position -= offset;
+
+        // Tại hàm SpawnAtPlaneCenter trong ARCitySpawner.cs
+        ScenarioController controller = spawnedCity.GetComponent<ScenarioController>();
+        if (controller != null)
+        {
+            // 1. Gán UI Manager từ Scene vào City mới sinh ra
+            controller.uiManager = uiManagerInScene;
+
+            // 2. Gán ngược Controller vào UI Manager để nút bấm biết gửi lệnh về đâu
+            if (uiManagerInScene != null)
+            {
+                uiManagerInScene.controller = controller;
+            }
+
+            controller.StartScenario();
+        }
     }
 }
