@@ -22,7 +22,8 @@ public class StoryStep
     [TextArea(3, 10)]
     public string dialogueText;
     public Sprite illustration;
-    public AudioClip voiceOver;
+    public AudioClip introVoice; // Phát ngay khi hiện Step
+    public AudioClip outroVoice;
 
     [Header("Visual Actions")]
     public VisualAction[] visualActions; // Danh sách các hành động diễn ra tại bước này

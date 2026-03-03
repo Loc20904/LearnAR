@@ -3,21 +3,50 @@ using System.Collections;
 using Assets.MobileARTemplateAssets.Scripts;
 using UnityEngine;
 
+
 public class SequenceController : MonoBehaviour
 {
     [Header("DANH SÁCH ĐỐI TƯỢNG (ACTORS)")]
     [Tooltip("Kéo các nhân vật/vật thể vào đây theo đúng thứ tự Index (0, 1, 2...)")]
     public GameObject[] actors;
-
     private Animator[] animators;
 
-    private void Awake()
+    private Vector3[] initialPositions;
+    private Quaternion[] initialRotations;
+
+    //private void Awake()
+    //{
+    //    // Tự động lấy Animator của các actors khi bắt đầu
+    //    animators = new Animator[actors.Length];
+    //    initialPositions = new Vector3[actors.Length]; // PHẢI CÓ DÒNG NÀY
+    //    initialRotations = new Quaternion[actors.Length]; // PHẢI CÓ DÒNG NÀY
+    //    for (int i = 0; i < actors.Length; i++)
+    //    {
+    //        if (actors[i] != null)
+    //        {
+    //            animators[i] = actors[i].GetComponent<Animator>();
+    //            initialPositions[i] = actors[i].transform.localPosition;
+    //            initialRotations[i] = actors[i].transform.localRotation;
+    //        }
+    //    }
+    //}
+
+    public void InitializeActors() // Đổi từ Awake thành hàm public
     {
-        // Tự động lấy Animator của các actors khi bắt đầu
         animators = new Animator[actors.Length];
+        initialPositions = new Vector3[actors.Length];
+        initialRotations = new Quaternion[actors.Length];
+
         for (int i = 0; i < actors.Length; i++)
         {
-            if (actors[i] != null) animators[i] = actors[i].GetComponent<Animator>();
+            if (actors[i] != null)
+            {
+                // Quan trọng: Dùng GetComponentInChildren vì Animator thường nằm ở model con
+                animators[i] = actors[i].GetComponentInChildren<Animator>();
+                initialPositions[i] = actors[i].transform.localPosition;
+                initialRotations[i] = actors[i].transform.localRotation;
+                Debug.Log($"Actor {i} Animator: {(animators[i] != null ? "Found" : "NULL")}");
+            }
         }
     }
 
@@ -28,6 +57,31 @@ public class SequenceController : MonoBehaviour
     {
         StopAllCoroutines();
         StartCoroutine(ExecuteSequenceRoutine(actions, onComplete));
+    }
+
+    /// <summary>
+    /// Hàm gọi để reset tất cả nhân vật về vị trí và trạng thái ban đầu
+    /// </summary>
+    public void ResetAllActors()
+    {
+        StopAllCoroutines(); // Dừng ngay mọi hành động di chuyển đang dở dang
+
+        for (int i = 0; i < actors.Length; i++)
+        {
+            if (actors[i] != null)
+            {
+                // Trả về vị trí và góc xoay gốc
+                actors[i].transform.localPosition = initialPositions[i];
+                actors[i].transform.localRotation = initialRotations[i];
+
+                // Trả Animator về trạng thái mặc định (về Idle ban đầu)
+                if (animators[i] != null)
+                {
+                    animators[i].Rebind();
+                    animators[i].Update(0f);
+                }
+            }
+        }
     }
 
     private IEnumerator ExecuteSequenceRoutine(VisualAction[] actions, Action onComplete)
