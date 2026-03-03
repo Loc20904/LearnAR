@@ -1,0 +1,102 @@
+{
+    "scenarioTitle": "Traffic safe",
+    "steps": [
+        {
+            "stepName": "Intro",
+            "dialogueText": "",
+            "introVoicePath": "Audio/VoiceStepIntro",
+            "outroVoicePath": "Audio/VoiceOuttroStepIntro",
+            "visualActions": [
+                {
+                    "type": "Move",
+                    "actorIndex": 0,
+                    "parameter": "",
+                    "targetPointName": "BoyMove1",
+                    "targetOffset": { "x": 0, "y": 0, "z": 0 },
+                    "duration": 8,
+                    "waitForFinish": true
+                },
+                {
+                    "type": "Rotate",
+                    "actorIndex": 0,
+                    "parameter": "",
+                    "targetPointName": "",
+                    "targetOffset": { "x": 0, "y": 90, "z": 0 },
+                    "duration": 0.5,
+                    "waitForFinish": true
+                }
+            ],
+            "choices": [
+                { "choiceText": "Băng qua đường", "isCorrect": false, "feedback": "", "nextStepIndex": 1 },
+                { "choiceText": "Chờ xe qua hết",  "isCorrect": true,  "feedback": "", "nextStepIndex": 2 }
+            ]
+        },
+        {
+            "stepName": "Incorrect",
+            "dialogueText": "",
+            "introVoicePath": "",
+            "outroVoicePath": "Audio/IncorrectVoice",
+            "visualActions": [
+                {
+                    "type": "Move",
+                    "actorIndex": 1,
+                    "parameter": "",
+                    "targetPointName": "Car1Move1",
+                    "targetOffset": { "x": 0, "y": 0, "z": 0 },
+                    "duration": 2,
+                    "waitForFinish": false
+                },
+                {
+                    "type": "Move",
+                    "actorIndex": 0,
+                    "parameter": "",
+                    "targetPointName": "BoyMove2",
+                    "targetOffset": { "x": 0, "y": 0, "z": 0 },
+                    "duration": 2,
+                    "waitForFinish": true
+                },
+                {
+                    "type": "Animate",
+                    "actorIndex": 0,
+                    "parameter": "falling-down",
+                    "targetPointName": "",
+                    "targetOffset": { "x": 0, "y": 0, "z": 0 },
+                    "duration": 10,
+                    "waitForFinish": true
+                }
+            ],
+            "choices": [
+                { "choiceText": "Restart", "isCorrect": false, "feedback": "", "nextStepIndex": 0 }
+            ]
+        },
+        {
+            "stepName": "correct",
+            "dialogueText": "",
+            "introVoicePath": "Audio/CorectVoice",
+            "outroVoicePath": "",
+            "visualActions": [
+                {
+                    "type": "Move",
+                    "actorIndex": 1,
+                    "parameter": "",
+                    "targetPointName": "Car1Move2",
+                    "targetOffset": { "x": 0, "y": 0, "z": 0 },
+                    "duration": 5,
+                    "waitForFinish": true
+                },
+                {
+                    "type": "Move",
+                    "actorIndex": 0,
+                    "parameter": "",
+                    "targetPointName": "BoyMove3",
+                    "targetOffset": { "x": 0, "y": 0, "z": 0 },
+                    "duration": 5,
+                    "waitForFinish": true
+                }
+            ],
+            "choices": [
+                { "choiceText": "Restart", "isCorrect": false, "feedback": "", "nextStepIndex": 0 }
+            ]
+        }
+    ]
+}

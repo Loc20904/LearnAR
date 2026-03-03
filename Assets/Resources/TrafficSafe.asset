@@ -1,0 +1,102 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 0}
+  m_Name: TrafficSafe
+  m_EditorClassIdentifier: Assembly-CSharp::ScenarioData
+  scenarioTitle: Traffic safe
+  steps:
+  - stepName: Intro
+    dialogueText: 
+    illustration: {fileID: 0}
+    introVoice: {fileID: 8300000, guid: 3b62c8dda41827343b2ade094c6c432d, type: 3}
+    outroVoice: {fileID: 8300000, guid: 73b3fdd31b92e0349a841fe92d184c11, type: 3}
+    visualActions:
+    - type: 0
+      actorIndex: 0
+      parameter: 
+      targetPointName: BoyMove1
+      targetOffset: {x: 0, y: 0, z: 0}
+      duration: 8
+      waitForFinish: 1
+    - type: 1
+      actorIndex: 0
+      parameter: 
+      targetPointName: BoyMove1
+      targetOffset: {x: 0, y: 90, z: 0}
+      duration: 0.5
+      waitForFinish: 1
+    choices:
+    - choiceText: "B\u0103ng qua \u0111\u01B0\u1EDDng"
+      isCorrect: 0
+      feedback: 
+      nextStepIndex: 1
+    - choiceText: "Ch\u1EDD xe qua h\u1EBFt"
+      isCorrect: 1
+      feedback: 
+      nextStepIndex: 2
+  - stepName: Incorrect
+    dialogueText: 
+    illustration: {fileID: 0}
+    introVoice: {fileID: 0}
+    outroVoice: {fileID: 8300000, guid: 26237b7b23ad0bf45b3c6f79692a2183, type: 3}
+    visualActions:
+    - type: 0
+      actorIndex: 1
+      parameter: 
+      targetPointName: Car1Move1
+      targetOffset: {x: 0, y: 0, z: 0}
+      duration: 2
+      waitForFinish: 0
+    - type: 0
+      actorIndex: 0
+      parameter: 
+      targetPointName: BoyMove2
+      targetOffset: {x: 0, y: 0, z: 0}
+      duration: 2
+      waitForFinish: 1
+    - type: 2
+      actorIndex: 0
+      parameter: falling-down
+      targetPointName: 
+      targetOffset: {x: 0, y: 0, z: 0}
+      duration: 10
+      waitForFinish: 1
+    choices:
+    - choiceText: Restart
+      isCorrect: 0
+      feedback: 
+      nextStepIndex: 0
+  - stepName: correct
+    dialogueText: 
+    illustration: {fileID: 0}
+    introVoice: {fileID: 8300000, guid: 850dbc4990549744991553f8efcad277, type: 3}
+    outroVoice: {fileID: 0}
+    visualActions:
+    - type: 0
+      actorIndex: 1
+      parameter: 
+      targetPointName: Car1Move2
+      targetOffset: {x: 0, y: 0, z: 0}
+      duration: 5
+      waitForFinish: 1
+    - type: 0
+      actorIndex: 0
+      parameter: 
+      targetPointName: BoyMove3
+      targetOffset: {x: 0, y: 0, z: 0}
+      duration: 5
+      waitForFinish: 1
+    choices:
+    - choiceText: Restart
+      isCorrect: 0
+      feedback: 
+      nextStepIndex: 0
