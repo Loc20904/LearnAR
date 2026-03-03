@@ -1,8 +1,10 @@
 ﻿using UnityEngine;
+using UnityEngine.Scripting;
 
 // Định nghĩa các loại hành động có thể cấu hình
 public enum ActionType { Move, Rotate, Animate, Wait }
 
+[Preserve]
 [System.Serializable]
 public class VisualAction
 {
@@ -15,6 +17,7 @@ public class VisualAction
     public bool waitForFinish = true; // Có chờ hành động này xong mới chạy tiếp không?
 }
 
+[Preserve]
 [System.Serializable]
 public class StoryStep
 {
@@ -32,6 +35,7 @@ public class StoryStep
     public Choice[] choices;
 }
 
+[Preserve]
 [System.Serializable]
 public class Choice
 {
@@ -41,6 +45,7 @@ public class Choice
     public int nextStepIndex;
 }
 
+[Preserve]
 [CreateAssetMenu(fileName = "NewScenario", menuName = "AR Game/Scenario")]
 public class ScenarioData : ScriptableObject
 {

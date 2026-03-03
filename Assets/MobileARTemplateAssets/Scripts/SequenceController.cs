@@ -2,8 +2,10 @@ using System;
 using System.Collections;
 using Assets.MobileARTemplateAssets.Scripts;
 using UnityEngine;
+using UnityEngine.Scripting;
 
 
+[Preserve]
 public class SequenceController : MonoBehaviour
 {
     [Header("DANH SÁCH ĐỐI TƯỢNG (ACTORS)")]
@@ -86,52 +88,89 @@ public class SequenceController : MonoBehaviour
 
     private IEnumerator ExecuteSequenceRoutine(VisualAction[] actions, Action onComplete)
     {
-        if (actions == null || actions.Length == 0) yield break;
-
-        foreach (var action in actions)
+        if (actions == null || actions.Length == 0)
         {
-            if (action.actorIndex >= actors.Length || actors[action.actorIndex] == null) continue;
+            Debug.Log("[SequenceController] Không có actions nào để chạy, gọi onComplete ngay.");
+            onComplete?.Invoke();
+            yield break;
+        }
+
+        bool hasError = false;
+
+        for (int actionIdx = 0; actionIdx < actions.Length; actionIdx++)
+        {
+            var action = actions[actionIdx];
+
+            // Kiểm tra actorIndex hợp lệ
+            if (action.actorIndex < 0 || action.actorIndex >= actors.Length)
+            {
+                Debug.LogWarning($"[SequenceController] Action {actionIdx}: actorIndex {action.actorIndex} ngoài phạm vi (actors.Length={actors.Length}). Bỏ qua.");
+                continue;
+            }
+
+            if (actors[action.actorIndex] == null)
+            {
+                Debug.LogWarning($"[SequenceController] Action {actionIdx}: Actor tại index {action.actorIndex} bị NULL. Bỏ qua.");
+                continue;
+            }
 
             Transform targetTransform = actors[action.actorIndex].transform;
-            Animator targetAnim = animators[action.actorIndex];
+            Animator targetAnim = (animators != null && action.actorIndex < animators.Length)
+                ? animators[action.actorIndex]
+                : null;
 
             IEnumerator subroutine = null;
 
-            switch (action.type)
+            try
             {
-                case ActionType.Move:
-                    Vector3 targetPos = targetTransform.position;
+                switch (action.type)
+                {
+                    case ActionType.Move:
+                        Vector3 targetPos = targetTransform.position;
 
-                    // Tìm Point theo tên bên trong Prefab này
-                    if (!string.IsNullOrEmpty(action.targetPointName))
-                    {
-                        // Tìm trong các con của Prefab (bao gồm cả các PointMove bạn đã đặt)
-                        Transform point = transform.FindDeepChild(action.targetPointName);
-                        if (point != null) targetPos = point.position;
-                        else Debug.LogWarning("Không tìm thấy Point: " + action.targetPointName);
-                    }
-                    else
-                    {
-                        targetPos += (targetTransform.rotation * action.targetOffset);
-                    }
-                    if (targetAnim != null)
-                        subroutine = MoveObject(targetTransform, targetPos, action.duration, targetAnim);
-                    else
-                        subroutine = MoveObject(targetTransform, targetPos, action.duration);
-                    break;
+                        // Tìm Point theo tên bên trong Prefab này
+                        if (!string.IsNullOrEmpty(action.targetPointName))
+                        {
+                            Transform point = transform.FindDeepChild(action.targetPointName);
+                            if (point != null)
+                            {
+                                targetPos = point.position;
+                            }
+                            else
+                            {
+                                Debug.LogError($"[SequenceController] Action {actionIdx}: Không tìm thấy Point '{action.targetPointName}'. Dùng vị trí hiện tại.");
+                            }
+                        }
+                        else
+                        {
+                            targetPos += (targetTransform.rotation * action.targetOffset);
+                        }
+                        if (targetAnim != null)
+                            subroutine = MoveObject(targetTransform, targetPos, action.duration, targetAnim);
+                        else
+                            subroutine = MoveObject(targetTransform, targetPos, action.duration);
+                        break;
 
-                case ActionType.Rotate:
-                    Quaternion targetRot = targetTransform.rotation * Quaternion.Euler(action.targetOffset);
-                    subroutine = RotateObject(targetTransform, targetRot, action.duration);
-                    break;
+                    case ActionType.Rotate:
+                        Quaternion targetRot = targetTransform.rotation * Quaternion.Euler(action.targetOffset);
+                        subroutine = RotateObject(targetTransform, targetRot, action.duration);
+                        break;
 
-                case ActionType.Animate:
-                    if (targetAnim != null) targetAnim.Play(action.parameter);
-                    break;
+                    case ActionType.Animate:
+                        if (targetAnim != null) targetAnim.Play(action.parameter);
+                        else Debug.LogWarning($"[SequenceController] Action {actionIdx}: Animate nhưng Animator là NULL.");
+                        break;
 
-                case ActionType.Wait:
-                    subroutine = WaitRoutine(action.duration);
-                    break;
+                    case ActionType.Wait:
+                        subroutine = WaitRoutine(action.duration);
+                        break;
+                }
+            }
+            catch (System.Exception ex)
+            {
+                Debug.LogError($"[SequenceController] Action {actionIdx} ({action.type}) bị lỗi: {ex.Message}\n{ex.StackTrace}");
+                hasError = true;
+                continue; // Bỏ qua action lỗi, chạy tiếp action kế
             }
 
             if (subroutine != null)
@@ -139,8 +178,6 @@ public class SequenceController : MonoBehaviour
                 if (action.waitForFinish)
                 {
                     yield return StartCoroutine(subroutine);
-                    // Khi Move xong thì tự động về Idle (nếu có animator)
-                    //if (action.type == ActionType.Move && targetAnim != null) targetAnim.Play("Idle");
                 }
                 else
                 {
@@ -148,6 +185,12 @@ public class SequenceController : MonoBehaviour
                 }
             }
         }
+
+        if (hasError)
+            Debug.LogWarning("[SequenceController] Sequence hoàn tất nhưng có lỗi ở một số action.");
+
+        // ĐẢM BẢO LUÔN GỌI onComplete dù có lỗi hay không
+        Debug.Log("[SequenceController] Sequence hoàn tất, gọi onComplete.");
         onComplete?.Invoke();
     }
 

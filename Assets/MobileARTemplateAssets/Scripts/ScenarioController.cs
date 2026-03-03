@@ -1,6 +1,8 @@
 ﻿using System.Collections;
 using UnityEngine;
+using UnityEngine.Scripting;
 
+[Preserve]
 [RequireComponent(typeof(AudioSource))]
 public class ScenarioController : MonoBehaviour
 {
@@ -48,6 +50,8 @@ public class ScenarioController : MonoBehaviour
         currentStepIndex = index;
         StoryStep step = data.steps[index];
 
+        Debug.Log($"[ScenarioController] Bắt đầu Step {index}: {step.stepName}");
+
         // 1. Dọn dẹp UI cũ
         if (uiManager != null) uiManager.ClearChoices();
 
@@ -55,21 +59,38 @@ public class ScenarioController : MonoBehaviour
         if (step.introVoice != null)
         {
             PlayVoice(step.introVoice);
-            // Nếu bạn muốn chờ đọc xong Intro mới chạy hoạt cảnh:
-            //while (audioSource.isPlaying) yield return null;
         }
 
         // 3. CHẠY HOẠT CẢNH (Visual Actions)
         bool sequenceFinished = false;
         if (sequenceController != null && step.visualActions != null && step.visualActions.Length > 0)
         {
+            Debug.Log($"[ScenarioController] Step {index}: Bắt đầu chạy {step.visualActions.Length} visual actions...");
+
             sequenceController.PlayActions(step.visualActions, () =>
             {
                 sequenceFinished = true;
+                Debug.Log($"[ScenarioController] Step {index}: Visual actions HOÀN TẤT.");
             });
 
-            // Chờ hoạt cảnh xong
-            while (!sequenceFinished) yield return null;
+            // Chờ hoạt cảnh xong VỚI TIMEOUT 60 GIÂY để tránh treo mãi mãi
+            float timeout = 60f;
+            float elapsed = 0f;
+            while (!sequenceFinished && elapsed < timeout)
+            {
+                elapsed += Time.deltaTime;
+                yield return null;
+            }
+
+            if (!sequenceFinished)
+            {
+                Debug.LogError($"[ScenarioController] Step {index}: TIMEOUT! Visual actions chạy quá 60 giây. Bỏ qua để tiếp tục.");
+                sequenceFinished = true;
+            }
+        }
+        else
+        {
+            Debug.Log($"[ScenarioController] Step {index}: Không có visual actions hoặc sequenceController null.");
         }
 
         // 4. PHÁT OUTRO VOICE VÀ CHỜ KẾT THÚC
@@ -77,18 +98,30 @@ public class ScenarioController : MonoBehaviour
         {
             PlayVoice(step.outroVoice);
 
-            // CHỜ CHO ĐẾN KHI VOICE PHÁT XONG HẾT
-            // (Vòng lặp này sẽ chạy liên tục cho đến khi isPlaying = false)
-            while (audioSource.isPlaying)
+            // CHỜ CHO ĐẾN KHI VOICE PHÁT XONG HẾT (với timeout 30 giây)
+            float audioTimeout = 30f;
+            float audioElapsed = 0f;
+            while (audioSource != null && audioSource.isPlaying && audioElapsed < audioTimeout)
             {
+                audioElapsed += Time.deltaTime;
                 yield return null;
+            }
+
+            if (audioElapsed >= audioTimeout)
+            {
+                Debug.LogWarning($"[ScenarioController] Step {index}: Audio timeout sau 30 giây.");
             }
         }
 
         // 5. SAU KHI VOICE HẾT MỚI HIỆN NÚT BẤM
+        Debug.Log($"[ScenarioController] Step {index}: Hiện choices.");
         if (uiManager != null)
         {
             uiManager.DisplayChoices(step.choices);
+        }
+        else
+        {
+            Debug.LogError($"[ScenarioController] Step {index}: uiManager bị NULL! Không thể hiện choices.");
         }
     }
 

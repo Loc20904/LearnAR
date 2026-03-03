@@ -1,7 +1,9 @@
 ﻿using UnityEngine;
+using UnityEngine.Scripting;
 
 namespace Assets.MobileARTemplateAssets.Scripts
 {
+    [Preserve]
     public static class TransformExtensions
     {
         // Hàm mở rộng để tìm con ở mọi cấp độ
