@@ -21,10 +21,6 @@ public class ARCitySpawner : MonoBehaviour
     private GameObject spawnedCity;
     public ScenarioData scenarioDataToAssign;
 
-    // Tên file ScriptableObject trong thư mục Resources (KHÔNG CÓ đuôi .asset)
-    [Header("Fallback: Tên file ScenarioData trong Resources")]
-    public string scenarioResourceName = "TrafficSafe";
-
     static List<ARRaycastHit> hits = new List<ARRaycastHit>();
 
     void Awake()
@@ -32,18 +28,10 @@ public class ARCitySpawner : MonoBehaviour
         raycastManager = GetComponent<ARRaycastManager>();
         planeManager = GetComponent<ARPlaneManager>();
 
-        // FALLBACK: Nếu scenarioDataToAssign bị null trên mobile build,
-        // tự động load từ Resources folder
-        if (scenarioDataToAssign == null && !string.IsNullOrEmpty(scenarioResourceName))
-        {
-            Debug.Log($"[ARCitySpawner] scenarioDataToAssign bị NULL. Thử load từ Resources/{scenarioResourceName}...");
-            scenarioDataToAssign = Resources.Load<ScenarioData>(scenarioResourceName);
-
-            if (scenarioDataToAssign != null)
-                Debug.Log($"[ARCitySpawner] Load từ Resources THÀNH CÔNG: {scenarioDataToAssign.scenarioTitle}");
-            else
-                Debug.LogError($"[ARCitySpawner] Load từ Resources THẤT BẠI! Kiểm tra file Resources/{scenarioResourceName}.asset");
-        }
+        // ScenarioLoader handles the full loading chain:
+        //   1. Inspector-assigned SO (Editor)  2. JSON TextAsset  3. Hardcoded fallback.
+        // Result is always non-null, so SetupAfterSpawn never injects null data.
+        scenarioDataToAssign = ScenarioLoader.Load(scenarioDataToAssign);
     }
 
     void OnEnable() => tapAction.action.Enable();
